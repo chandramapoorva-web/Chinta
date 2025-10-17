@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chinta • One click. A dopamine hit.</title>
+  <meta name="description" content="Chinta is a tiny, offline, privacy‑first page that helps you shift a looping thought into new perspectives in one click, now with automatic language detection and AI-powered shifts." />
+  <meta name="theme-color" content="#111827" />
+  
+  <!-- Google AdSense Code -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9180537637925365"
+     crossorigin="anonymous"></script>
+
+  <style>
+    /* Reset */
+    *{box-sizing:border-box}html,body{height:100%}body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;color:#0b1220;background:#0b0f19}
+
+    /* Animated neural gradient background */
+    .bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:radial-gradient(1200px 800px at 20% 10%, #7dd3fc22, transparent),
+      radial-gradient(1000px 700px at 80% 90%, #a78bfa22, transparent),
+      radial-gradient(900px 900px at 50% 50%, #34d39922, transparent)}
+    .bg::before{content:"";position:absolute;inset:-20%;
+      background:conic-gradient(from 0deg, #a78bfa11, #60a5fa11, #34d39911, #f472b611, #f59e0b11, #a78bfa11);
+      filter:blur(60px);animation:spin 28s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Layout */
+    .wrap{min-height:100%;display:grid;place-items:center;padding:24px}
+    .card{width:min(920px,100%);background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);border-radius:24px;padding:28px 24px;box-shadow:0 10px 40px rgba(0,0,0,0.35)}
+
+    /* Logo and taglines */
+    .logo{display:flex;align-items:center;gap:12px;margin:0 0 8px 0}
+    .logo .mark{width:36px;height:36px;border-radius:8px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#22d3ee,#a78bfa);box-shadow:0 8px 24px rgba(99,102,241,0.45)}
+    .logo .name{font-weight:800;letter-spacing:0.5px;color:#e5e7eb;font-size:1.25rem}
+    .tag-main{font-size:clamp(1.4rem, 1.2rem + 1.4vw, 2.2rem);font-weight:800;color:#fafafa;margin:6px 0 2px 0;text-shadow:0 2px 14px rgba(255,255,255,0.15)}
+    .tag-sub{font-size:clamp(1rem, 0.9rem + .6vw, 1.25rem);color:#d1d5db;margin:2px 0 18px 0}
+    .dopamine{background:linear-gradient(90deg,#22d3ee,#60a5fa,#a78bfa,#f472b6,#f59e0b,#34d399);-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4.6s linear infinite}
+    @keyframes shine{0%{background-position:0%}100%{background-position:200%}}
+
+    /* Input area */
+    .input{position:relative;margin:14px 0 12px 0}
+    textarea{width:100%;min-height:120px;border-radius:16px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:#f8fafc;padding:18px 16px;font-size:1.05rem;line-height:1.5;outline:none;transition:border .2s}
+    textarea:focus{border-color:#93c5fd}
+
+    /* Controls */
+    .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
+    .controls-main { display: flex; gap: 10px; }
+    .mode{display:flex;gap:8px;flex-wrap:wrap}
+    .pill{padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:#e5e7eb;font-weight:600;cursor:pointer;user-select:none}
+    .pill[aria-pressed="true"]{background:linear-gradient(135deg,#60a5fa,#a78bfa);border-color:transparent}
+
+    .btn{appearance:none;border:0;border-radius:14px;padding:14px 18px;font-weight:800;letter-spacing:.3px;color:#0b0f19;background:linear-gradient(135deg,#22d3ee,#a78bfa);box-shadow:0 12px 30px rgba(99,102,241,0.45), inset 0 -2px 0 rgba(0,0,0,0.15);cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .gemini-btn {
+      background: linear-gradient(135deg, #f59e0b, #f472b6);
+      box-shadow: 0 12px 30px rgba(244, 114, 182, 0.45), inset 0 -2px 0 rgba(0,0,0,0.15);
+    }
+
+    /* Output bubbles */
+    .outputs{display:grid;gap:10px;margin-top:18px}
+    .bubble{position:relative;padding:16px 44px 16px 16px;border-radius:16px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.07);color:#f3f4f6;opacity:0;transform:translateY(8px);animation:pop .5s ease forwards}
+    .bubble[dir="rtl"] { text-align: right; }
+    .bubble.gemini {
+      border-color: rgba(244, 114, 182, 0.5);
+      background: radial-gradient(circle at top left, rgba(244, 114, 182, 0.15), transparent 60%);
+    }
+    .bubble:nth-child(1){animation-delay:.06s}
+    .bubble:nth-child(2){animation-delay:.12s}
+    .bubble:nth-child(3){animation-delay:.18s}
+    @keyframes pop{to{opacity:1;transform:none}}
+    .bubble .pin{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);display:grid;place-items:center;cursor:pointer}
+    .bubble[dir="rtl"] .pin { right: auto; left: 8px; }
+    .hint{font-size:.9rem;color:#cbd5e1;margin-top:8px}
+
+    /* Loader */
+    .loader { text-align: center; color: #cbd5e1; font-size: 0.9rem; display: none; margin-top: 18px; }
+
+    /* Crisis panel */
+    .crisis{padding:16px;border-radius:16px;border:1px solid #ef4444;background:#7f1d1d33;color:#fecaca}
+    .crisis a{color:#fde68a}
+
+    /* Footer */
+    footer{margin-top:22px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:center;color:#a1a1aa}
+    footer a{color:#c7d2fe;text-decoration:none;border-bottom:1px dotted rgba(199,210,254,0.5)}
+
+    /* Modals */
+    html{scroll-behavior:smooth}
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+    .modal.open{display:flex}
+    .backdrop{position:absolute;inset:0;background:rgba(8,11,19,0.65);backdrop-filter:blur(2px)}
+    .modal-card{position:relative;width:min(820px,100%);border-radius:18px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.07);box-shadow:0 18px 60px rgba(0,0,0,0.5);padding:20px}
+    .modal-card h2{margin:0 0 8px 0;font-size:clamp(1.15rem, 1rem + .6vw, 1.35rem);color:#fafafa}
+    .modal-card p{margin:8px 0;color:#e5e7eb;line-height:1.7}
+    .modal-card a{color:#93c5fd;text-decoration:none;border-bottom:1px dotted rgba(147,197,253,0.6)}
+    .closex{position:absolute;top:10px;right:10px;display:inline-grid;place-items:center;width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:#e5e7eb;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <main class="wrap">
+    <section class="card" aria-label="Chinta focus shifter">
+      <header class="logo">
+        <div class="mark" aria-hidden="true">🧠</div>
+        <div class="name">Chinta</div>
+      </header>
+      <h1 class="tag-main">One click. <span class="dopamine">A dopamine hit</span>.</h1>
+      <p class="tag-sub">Shift your thought. Lift your mood.</p>
+
+      <div class="input">
+        <label for="thought" class="sr-only">Your looping thought</label>
+        <textarea id="thought" placeholder="What is looping in your mind?"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="mode" role="group" aria-label="Shift styles">
+          <button class="pill" data-style="playful" aria-pressed="true">Playful</button>
+          <button class="pill" data-style="calm">Calm</button>
+          <button class="pill" data-style="rational">Rational</button>
+          <button class="pill" data-style="child">Curious</button>
+          <button class="pill" data-style="wild">Surprise</button>
+        </div>
+        <div class="controls-main">
+          <button id="shift" class="btn" aria-label="Shift">SHIFT</button>
+          <button id="gemini-shift" class="btn gemini-btn" aria-label="Ask Gemini">✨ Ask Gemini</button>
+        </div>
+      </div>
+
+      <div id="panel" class="outputs" aria-live="polite"></div>
+      <div id="loader" class="loader">Thinking...</div>
+      <div id="hint" class="hint"></div>
+
+      <footer>
+        <span>Offline shifts are created in your browser</span>
+        <span>•</span>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#pins">Pins</a>
+      </footer>
+
+      <!-- Modals (unchanged) -->
+      <div id="modal-about" class="modal" role="dialog" aria-modal="true" aria-labelledby="about-title"><div class="backdrop" data-close="about"></div><div class="modal-card"><button class="closex" data-close="about" aria-label="Close">✕</button><h2 id="about-title">About Chinta</h2><p>Chinta is a tiny thought shifting tool that helps you break mental loops in seconds. It runs entirely in your browser with no data sent to any server.</p><p>Overthinking locks the brain into a narrow prediction cycle and raises stress. A small shift in attention can interrupt the loop, increase a sense of control, and spark a healthy dopamine lift. Micro shifts can lead to macro relief.</p><p>Created by <strong>Apoorva Chandram (Mr.)</strong>. One click. A dopamine hit.</p></div></div>
+      <div id="modal-contact" class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title"><div class="backdrop" data-close="contact"></div><div class="modal-card"><button class="closex" data-close="contact" aria-label="Close">✕</button><h2 id="contact-title">Contact</h2><p>Write to <a href="mailto:apoorva.chandram@yahoo.com">apoorva.chandram@yahoo.com</a> with feedback, ideas or stories.</p></div></div>
+      <div id="modal-privacy" class="modal" role="dialog" aria-modal="true" aria-labelledby="privacy-title"><div class="backdrop" data-close="privacy"></div><div class="modal-card"><button class="closex" data-close="privacy" aria-label="Close">✕</button><h2 id="privacy-title">Privacy</h2><p>Chinta runs completely in your browser. Your text does not leave your device. There are no accounts, no trackers and no third‑party cookies.</p><p>This tool offers perspective prompts only. It is not a medical service. If you feel unsafe or at risk please reach out to local support or to the resources shown in the crisis message.</p></div></div>
+      <div id="modal-pins" class="modal" role="dialog" aria-modal="true" aria-labelledby="pins-title"><div class="backdrop" data-close="pins"></div><div class="modal-card"><button class="closex" data-close="pins" aria-label="Close">✕</button><h2 id="pins-title">Pinned shifts</h2><div id="pins-list" style="display:grid;gap:10px"></div></div></div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/franc-min@6/dist/franc.umd.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // === Helpers ===
+      const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+      const panel = document.getElementById('panel');
+      const hint = document.getElementById('hint');
+      const input = document.getElementById('thought');
+      const loader = document.getElementById('loader');
+      const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+      // === i18n Language Packs & Manager ===
+      const i18n = {
+        packs: {
+          en: { modes: { playful: "Playful", calm: "Calm", rational: "Rational", child: "Curious", wild: "Surprise" }, shift_btn: "SHIFT", placeholder: "What is looping in your mind?", tones: ["💡 Reframe:", "🪶 Light thought:", "✨ New angle:", "🔎 Consider:"], nudges: ["Try saying it out loud—does it soften?", "Make it 10% kinder and read again.", "One kind action after this. Small is fine.", "Text one person who’d care to hear this.", "Name one thing inside your control."], themed: { finance: `Imagine money as a shy pet—it comes closer when you create calm value.`, work: `Plot twist: productivity arrives after one tiny, non-perfect start.`, love: `New camera angle: your heart asks for curiosity over certainty.`, anxiety: `What if the body is just asking for slower air and a gentler pace?` }, playful: { starts: ['Plot twist:','Tiny miracle alert:','What if this is a side quest where'], ends: ['you collect one small win.','you learn one friendly thing.', 'you %%ACTION%%.'], connector: "and" }, calm: `I notice the thought "%%THOUGHT%%" and let it pass like a cloud. I return to one breath and one helpful action.`, rational: `If this is true, what evidence supports it—and what doesn’t? I choose to %%ACTION%%.`, reflective: `What might this thought be trying to protect me from? If it could speak kindly, what would it ask for right now?`, wild: [ s => `📰 As a headline: ${s.replace(/\.$/,'').toUpperCase()}. Next: state the smallest next step in under twelve words.`, s => `📜 As a text to future-me: “I did one small thing and the story moved forward.”`, s => `👩‍🍳 As a recipe: two parts patience, one part help, a pinch of courage. Bake 1 hour.` ], actions: { finance: ["track one expense today","pause one non-essential purchase","send one honest money text","move $5 to savings"], work: ["write a 2-line plan","draft the first sentence of the email","block 10 minutes","ask one clear question"], love: ["state one need kindly","give one specific appreciation","take a short walk before replying"], anxiety: ["breathe 4-seconds in, 6-seconds out x4","name 3 things you can see","put the worry on paper"], general: ["do a two-minute task","tidy a tiny area","drink water","step outside for 60 seconds"] }, hints: { default: "Tip: Tap a bubble to copy. Press Space to shift again.", copied: "Copied!", pinned: "Pinned!", error: "Could not copy." } },
+          es: { modes: { playful: "Juguetón", calm: "Calma", rational: "Racional", child: "Curioso", wild: "Sorpresa" }, shift_btn: "CAMBIAR", placeholder: "¿Qué está dando vueltas en tu mente?", tones: ["💡 Reencuadre:", "🪶 Pensamiento ligero:", "✨ Nuevo ángulo:", "🔎 Considera:"], nudges: ["Intenta decirlo en voz alta, ¿se suaviza?", "Hazlo un 10% más amable y léelo de nuevo.", "Una acción amable después de esto. Algo pequeño está bien.", "Envía un mensaje a alguien a quien le importaría saber esto.", "Nombra una cosa que esté bajo tu control."], themed: { finance: `Imagina el dinero como una mascota tímida: se acerca cuando creas valor con calma.`, work: `Giro de guion: la productividad llega después de un pequeño comienzo, no perfecto.`, love: `Nuevo ángulo de cámara: tu corazón pide curiosidad en lugar de certeza.`, anxiety: `¿Y si el cuerpo solo está pidiendo aire más lento y un ritmo más suave?` }, playful: { starts: ['Giro de guion:','Alerta de pequeño milagro:','¿Y si esto es una misión secundaria donde'], ends: ['recoges una pequeña victoria.','aprendes una cosa amable.', 'haces %%ACTION%%.'], connector: "y" }, calm: `Noto el pensamiento "%%THOUGHT%%" y lo dejo pasar como una nube. Vuelvo a una respiración y una acción útil.`, rational: `Si esto es cierto, ¿qué evidencia lo respalda y cuál no? Elijo %%ACTION%%.`, reflective: `¿De qué podría estar tratando de protegerme este pensamiento? Si pudiera hablar amablemente, ¿qué pediría ahora mismo?`, wild: [ s => `📰 Como titular: ${s.replace(/\.$/,'').toUpperCase()}. Siguiente: indica el próximo paso más pequeño en menos de doce palabras.`, s => `📜 Como mensaje para mi yo-futuro: "Hice una pequeña cosa y la historia avanzó."`, s => `👩‍🍳 Como receta: dos partes de paciencia, una de ayuda, una pizca de valentía. Hornear 1 hora.` ], actions: { finance: ["registrar un gasto hoy","pausar una compra no esencial","enviar un mensaje honesto sobre dinero","mover 5€ a ahorros"], work: ["escribir un plan de 2 líneas","redactar la primera frase del email","bloquear 10 minutos","hacer una pregunta clara"], love: ["expresar una necesidad amablemente","dar un agradecimiento específico","dar un corto paseo antes de responder"], anxiety: ["inhalar 4s, exhalar 6s (x4)","nombrar 3 cosas que puedes ver","escribir la preocupación en un papel"], general: ["hacer una tarea de dos minutos","ordenar un área pequeña","beber agua","salir afuera por 60 segundos"] }, hints: { default: "Consejo: Toca una burbuja para copiar. Pulsa Espacio para cambiar de nuevo.", copied: "¡Copiado!", pinned: "¡Guardado!", error: "No se pudo copiar." } },
+          hi: { modes: { playful: "चंचल", calm: "शांत", rational: "तर्कसंगत", child: "जिज्ञासु", wild: "आश्चर्य" }, shift_btn: "बदलें", placeholder: " आपके मन में क्या चल रहा है?", tones: ["💡 नया दृष्टिकोण:", "🪶 हल्का विचार:", "✨ नया एंगल:", "🔎 विचार करें:"], nudges: ["इसे जोर से कहने की कोशिश करें—क्या यह नरम लगता है?", "इसे 10% और दयालु बनाएं और फिर से पढ़ें।", "इसके बाद एक दयालु कार्य करें। छोटा सा भी ठीक है।", "किसी ऐसे व्यक्ति को टेक्स्ट करें जिसे यह सुनना अच्छा लगेगा।", "एक ऐसी चीज़ बताएं जो आपके नियंत्रण में है।"], themed: { finance: "सोचें कि पैसा एक शर्मीले पालतू जानवर की तरह है - जब आप शांति से मूल्य बनाते हैं तो यह करीब आता है।", work: "कहानी में मोड़: उत्पादकता एक छोटी, अपूर्ण शुरुआत के बाद आती है।", love: "नया कैमरा एंगल: आपका दिल निश्चितता के बजाय जिज्ञासा मांगता है।", anxiety: "क्या हो अगर शरीर सिर्फ धीमी सांस और एक सौम्य गति मांग रहा हो?" }, playful: { starts: ['कहानी में मोड़:','छोटे चमत्कार की चेतावनी:','क्या होगा अगर यह एक साइड क्वेस्ट है जहाँ'], ends: ['आप एक छोटी सी जीत हासिल करते हैं।','आप एक दोस्ताना बात सीखते हैं।', 'आप %%ACTION%% करते हैं।'], connector: "और" }, calm: `मैं "%%THOUGHT%%" विचार को नोटिस करता हूं और इसे बादल की तरह गुजरने देता हूं। मैं एक सांस और एक सहायक क्रिया पर लौटता हूं।`, rational: `अगर यह सच है, तो कौन से सबूत इसका समर्थन करते हैं - और कौन से नहीं? मैं %%ACTION%% करना चुनता हूं।`, reflective: `यह विचार मुझे किससे बचाने की कोशिश कर रहा होगा? अगर यह कृपया बात कर सकता, तो यह अभी क्या मांगता?`, wild: [ s => `📰 एक शीर्षक के रूप में: ${s.replace(/\.$/,'').toUpperCase()}। अगला: बारह शब्दों से कम में अगला सबसे छोटा कदम बताएं।`, s => `📜 भविष्य के लिए एक संदेश: "मैंने एक छोटा काम किया और कहानी आगे बढ़ी।"`, s => `👩‍🍳 एक रेसिपी के रूप में: दो भाग धैर्य, एक भाग मदद, एक चुटकी साहस। 1 घंटा बेक करें।` ], actions: { finance: ["आज एक खर्च ट्रैक करें", "एक गैर-जरूरी खरीद रोकें", "पैसे के बारे में एक ईमानदार टेक्स्ट भेजें", "बचत में ₹100 डालें"], work: ["2-लाइन की योजना लिखें", "ईमेल का पहला वाक्य लिखें", "10 मिनट ब्लॉक करें", "एक स्पष्ट प्रश्न पूछें"], love: ["एक जरूरत को कृपया बताएं", "एक विशिष्ट प्रशंसा करें", "जवाब देने से पहले थोड़ी देर टहलें"], anxiety: ["4-सेकंड सांस अंदर, 6-सेकंड बाहर (4 बार)", "3 चीजें बताएं जो आप देख सकते हैं", "चिंता को कागज पर लिखें"], general: ["दो मिनट का काम करें", "एक छोटे से क्षेत्र को साफ करें", "पानी पिएं", "60 सेकंड के लिए बाहर जाएं"] }, hints: { default: "सुझाव: कॉपी करने के लिए बुलबुले पर टैप करें। फिर से बदलने के लिए स्पेस दबाएं।", copied: "कॉपी किया गया!", pinned: "पिन किया गया!", error: "कॉपी नहीं हो सका।" } },
+          ar: { modes: { playful: "مرح", calm: "هادئ", rational: "عقلاني", child: "فضولي", wild: "مفاجأة" }, shift_btn: "تغيير", placeholder: "ما الذي يدور في ذهنك؟", tones: ["💡 إعادة صياغة:", "🪶 فكرة خفيفة:", "✨ زاوية جديدة:", "🔎 تأمل:"], nudges: ["حاول قولها بصوت عالٍ - هل تبدو ألطف؟", "اجعلها ألطف بنسبة 10٪ واقرأها مرة أخرى.", "قم بعمل لطيف واحد بعد هذا. لا بأس أن يكون صغيراً.", "أرسل رسالة إلى شخص يهتم بسماع هذا.", "اذكر شيئًا واحدًا تحت سيطرتك."], themed: { finance: "تخيل أن المال حيوان أليف خجول - يقترب منك عندما تخلق قيمة بهدوء.", work: "مفاجأة: الإنتاجية تأتي بعد بداية صغيرة وغير مثالية.", love: "زاوية كاميرا جديدة: قلبك يطلب الفضول بدلاً من اليقين.", anxiety: "ماذا لو كان الجسم يطلب فقط هواءً أبطأ ووتيرة ألطف؟" }, playful: { starts: ['مفاجأة:', 'تنبيه بمعجزة صغيرة:', 'ماذا لو كانت هذه مهمة جانبية حيث'], ends: ['تحقق فوزًا صغيرًا.', 'تتعلم شيئًا وديًا واحدًا.', 'تقوم بـ %%ACTION%%.'], connector: "و" }, calm: `ألاحظ فكرة "%%THOUGHT%%" وأدعها تمر مثل سحابة. أعود إلى نفس واحد وعمل مفيد واحد.`, rational: `إذا كان هذا صحيحًا, فما الدليل الذي يدعمه - وما الذي لا يدعمه؟ أختار أن %%ACTION%%.`, reflective: `ما الذي قد تحاول هذه الفكرة حمايتي منه؟ لو أمكنها التحدث بلطف, فماذا ستطلب الآن؟`, wild: [ s => `📰 كعنوان رئيسي: ${s.replace(/\.$/,'').toUpperCase()}. التالي: اذكر أصغر خطوة تالية في أقل من اثنتي عشرة كلمة.`, s => `📜 كنص إلى نفسي في المستقبل: "لقد فعلت شيئًا صغيرًا واحدًا وتقدمت القصة."`, s => `👩‍🍳 كوصفة: جزآن من الصبر, جزء واحد من المساعدة, قليل من الشجاعة. تُخبز لمدة ساعة.` ], actions: { finance: ["تتبع نفقة واحدة اليوم", "أوقف عملية شراء واحدة غير ضرورية", "أرسل رسالة نصية صادقة عن المال", "انقل 5 دولارات إلى المدخرات"], work: ["اكتب خطة من سطرين", "صياغة الجملة الأولى من البريد الإلكتروني", "احجز 10 دقائق", "اطرح سؤالاً واضحًا"], love: ["اذكر حاجة واحدة بلطف", "قدم تقديرًا محددًا", "قم بنزهة قصيرة قبل الرد"], anxiety: ["تنفس للداخل 4 ثوانٍ, وللخارج 6 ثوانٍ (4 مرات)", "اذكر 3 أشياء يمكنك رؤيتها", "ضع القلق على الورق"], general: ["قم بمهمة لمدة دقيقتين", "رتب منطقة صغيرة", "اشرب الماء", "اخرج لمدة 60 ثانية"] }, hints: { default: "نصيحة: انقر على الفقاعة للنسخ. اضغط على مسافة للتغيير مرة أخرى.", copied: "تم النسخ!", pinned: "تم التثبيت!", error: "لم يتمكن من النسخ." } },
+        },
+        rtlLangs: ['ar', 'he', 'ur', 'fa'],
+        get(key, lang = 'en') {
+          const path = key.split('.'); let pack = this.packs[lang] || this.packs.en; let result = pack;
+          try { for (const p of path) { result = result[p]; } return result; } 
+          catch (e) { pack = this.packs.en; result = pack; for (const p of path) { result = result[p]; } return result; }
+        },
+        pick(key, lang = 'en') { const arr = this.get(key, lang); return Array.isArray(arr) ? pick(arr) : arr; }
+      };
+
+      // --- Core Application Logic ---
+      const modeButtons = $$('.pill');
+      let mode = 'playful';
+      modeButtons.forEach(btn => btn.addEventListener('click', () => {
+        modeButtons.forEach(b => b.setAttribute('aria-pressed','false'));
+        btn.setAttribute('aria-pressed','true');
+        mode = btn.dataset.style;
+      }));
+
+      const crisisTerms = ['suicide','kill myself','end my life','goodbye forever','no reason to live','i want to die','self harm','end it all'];
+      const looksLikeCrisis = (text='') => crisisTerms.some(k => text.toLowerCase().includes(k));
+      function crisisPanel(){
+        const div = document.createElement('div');
+        div.className = 'crisis';
+        div.innerHTML = `<strong>This feels serious</strong><div>You matter and real human help can support you right now</div><div>If you feel at risk please reach out</div><ul><li>United States Call or text 988</li><li>Find international help lines at <a href="https://www.opencounseling.com/suicide-hotlines" target="_blank" rel="noopener">OpenCounseling</a></li><li>Talk to someone you trust if you can</li></ul>`;
+        return div;
+      }
+
+      const fillers = [/\bi just\b/gi,/\bi think\b/gi,/\bkinda\b/gi,/\bsorta\b/gi,/\bmaybe\b/gi,/\bjust\b/gi];
+      const tidy = s => s.replace(/[\r\t]+/g,' ').replace(/\s{2,}/g,' ').replace(/\s*([\.,!?])\s*/g,'$1 ').trim();
+      function normalizeThought(t){
+        let s = String(t||'');
+        fillers.forEach(rx => s = s.replace(rx,''));
+        s = s.replace(/\s{2,}/g,' ').trim();
+        if(s && !/[\.!?]$/.test(s)) s += '.';
+        return s;
+      }
+
+      function detectTheme(text=''){
+        const t = text.toLowerCase();
+        if (/(money|bill|rent|salary|debt|budget|cash|dinero|factura|alquiler|salario|deuda|presupuesto|argent|salaire|dette|geld|rechnung|gehalt|schulden|पैसा|बिल|वेतन|कर्ज)/.test(t)) return 'finance';
+        if (/(job|work|boss|deadline|meeting|career|trabajo|jefe|carrera|boulot|patron|carrière|arbeit|karriere|काम|बॉस|करियर)/.test(t)) return 'work';
+        if (/(love|relationship|partner|breakup|lonely|friend|amor|relación|pareja|amigo|amour|relation|solitaire|liebe|beziehung|freund|प्यार|रिश्ता|दोस्त)/.test(t)) return 'love';
+        if (/(health|pain|sleep|tired|anxious|panic|stress|salud|dolor|sueño|ansiedad|pánico|santé|douleur|sommeil|anxieux|gesundheit|schmerz|schlaf|angst|स्वास्थ्य|दर्द|नींद|तनाव)/.test(t)) return 'anxiety';
+        return 'general';
+      }
+      
+      const maybeNudge = (s, lang) => Math.random()<0.6 ? `${s} ${i18n.pick('nudges', lang)}` : s;
+      const smallAction = (theme, lang) => i18n.pick(`actions.${theme}`, lang) || i18n.pick('actions.general', lang);
+      function playfulShift(t, theme, lang){ const themed = i18n.get(`themed.${theme}`, lang); if (theme!=='general' && themed) return `${i18n.pick('tones', lang)} ${themed}`; const starts = i18n.get('playful.starts', lang); const ends = i18n.get('playful.ends', lang); const action = smallAction(theme, lang); const connector = i18n.get('playful.connector', lang); const endPhrase = pick(ends).replace('%%ACTION%%', action); return `${i18n.pick('tones', lang)} ${pick(starts)} ${t.toLowerCase()} ${connector} ${endPhrase}`; }
+      function calmShift(t, lang){ const template = i18n.get('calm', lang); return `${i18n.pick('tones', lang)} ${template.replace('%%THOUGHT%%', t.replace(/\.$/,''))}`; }
+      function rationalShift(t, theme, lang){ const template = i18n.get('rational', lang); const action = smallAction(theme, lang); return `${i18n.pick('tones', lang)} ${template.replace('%%ACTION%%', action)}`; }
+      function reflectiveShift(t, lang){ return `${i18n.pick('tones', lang)} ${i18n.get('reflective', lang)}`; }
+      function wildShift(t, lang){ const frames = i18n.get('wild', lang); return pick(frames)(t); }
+      function compositeShift(t, theme, lang){ const a = playfulShift(t, theme, lang); const b = calmShift(t, lang); const c = rationalShift(t, theme, lang); return `${a} ${b} ${c}`; }
+      function makeShifts(raw, lang){ const clean = normalizeThought(raw); const theme = detectTheme(clean); const generators = new Map([ ['playful', () => playfulShift(clean, theme, lang)], ['calm', () => calmShift(clean, lang)], ['rational', () => rationalShift(clean, theme, lang)], ['child', () => reflectiveShift(clean, lang)], ['wild', () => wildShift(clean, lang)] ]); const out = []; out.push(maybeNudge(generators.get(mode)(), lang)); if (Math.random() < 0.5) out.push(maybeNudge(compositeShift(clean, theme, lang), lang)); const others = [...generators.keys()].filter(k=>k!==mode); while(out.length<3 && others.length){ const k = others.splice(Math.floor(Math.random()*others.length),1)[0]; out.push(maybeNudge(generators.get(k)(), lang)); } return out; }
+
+      function render(list, lang){
+        panel.innerHTML = '';
+        list.forEach(txt => {
+          const b = document.createElement('div');
+          b.className = 'bubble';
+          if (i18n.rtlLangs.includes(lang)) { b.setAttribute('dir', 'rtl'); }
+          b.textContent = tidy(txt);
+          const pin = document.createElement('button');
+          pin.className = 'pin'; pin.setAttribute('title','Pin'); pin.textContent = '⭐';
+          pin.addEventListener('click', (e)=>{ e.stopPropagation(); doPin(txt, lang); });
+          b.appendChild(pin);
+          panel.appendChild(b);
+        });
+        hint.textContent = i18n.get('hints.default', lang);
+      }
+      
+      // === SECURE Gemini API Integration ===
+      async function getGeminiShift(userQuery) {
+        try {
+          const response = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: userQuery })
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            console.error("API Error:", error.message);
+            return "Sorry, I couldn't get a suggestion right now. Please try again.";
+          }
+
+          const result = await response.json();
+          return result.text;
+        } catch (error) {
+          console.error("Fetch Error:", error);
+          return "There was a problem reaching the server. Please check your connection.";
+        }
+      }
+
+      function renderGemini(text) {
+        panel.innerHTML = '';
+        const b = document.createElement('div');
+        b.className = 'bubble gemini';
+        b.textContent = tidy(text);
+        
+        const pin = document.createElement('button');
+        pin.className = 'pin'; pin.setAttribute('title','Pin'); pin.textContent = '⭐';
+        pin.addEventListener('click', (e)=>{ e.stopPropagation(); doPin(text); });
+        b.appendChild(pin);
+        
+        panel.appendChild(b);
+        hint.textContent = i18n.get('hints.default', 'en');
+      }
+
+      // --- Event Handlers & Main Execution ---
+      panel.addEventListener('click', async (e)=>{
+        const b = e.target.closest('.bubble'); if(!b) return;
+        const lang = i18n.rtlLangs.includes(b.getAttribute('dir')) ? 'ar' : 'en';
+        try{ await navigator.clipboard.writeText(b.textContent.replace('⭐','').trim()); hint.textContent = i18n.get('hints.copied', lang); }
+        catch{ hint.textContent = i18n.get('hints.error', lang); }
+      });
+
+      function doPin(text, lang = 'en'){
+        try {
+          const pins = JSON.parse(localStorage.getItem('chinta_pins')||'[]');
+          pins.unshift({text: tidy(text), ts: Date.now()});
+          localStorage.setItem('chinta_pins', JSON.stringify(pins.slice(0,50)));
+          hint.textContent = i18n.get('hints.pinned', lang);
+        } catch {}
+      }
+      
+      function loadPins(){
+        const list = JSON.parse(localStorage.getItem('chinta_pins')||'[]');
+        const wrap = document.getElementById('pins-list');
+        wrap.innerHTML='';
+        if(!list.length){ wrap.innerHTML = '<p>No pins yet. Tap ⭐ on a shift to save it.</p>'; return; }
+        list.forEach(p=>{
+          const d = document.createElement('div');
+          d.className='bubble'; d.textContent = p.text;
+          if (/[\u0600-\u06FF\u0750-\u077F]/.test(p.text)) { d.setAttribute('dir', 'rtl'); }
+          wrap.appendChild(d);
+        });
+      }
+
+      function getLanguage(text) {
+        if (/[\u0900-\u097F]/.test(text)) return 'hi';
+        if (/[\u0600-\u06FF]/.test(text)) return 'ar';
+
+        if (typeof franc === 'function') {
+            try {
+                const langMap = { 'eng': 'en', 'spa': 'es' }; 
+                const whitelist = Object.keys(langMap);
+                const lang3 = franc(text, { only: whitelist });
+                return langMap[lang3] || 'en';
+            } catch (e) {
+                console.error("Language detection failed:", e);
+                return 'en';
+            }
+        }
+        return 'en';
+      }
+
+      function doShift(){
+        const value = input.value.trim();
+        if(!value){ input.focus(); return; }
+        panel.innerHTML = ''; hint.textContent = '';
+        if(looksLikeCrisis(value)){ panel.appendChild(crisisPanel()); return; }
+
+        const lang = getLanguage(value);
+        
+        render(makeShifts(value, lang), lang);
+        try{ const hist = JSON.parse(localStorage.getItem('chinta_hist')||'[]'); hist.unshift({t:value,ts:Date.now()}); localStorage.setItem('chinta_hist', JSON.stringify(hist.slice(0,20))); }catch{}
+      }
+
+      async function doGeminiShift() {
+        const value = input.value.trim();
+        if(!value){ input.focus(); return; }
+        panel.innerHTML = ''; hint.textContent = '';
+        if(looksLikeCrisis(value)){ panel.appendChild(crisisPanel()); return; }
+        
+        loader.style.display = 'block';
+        const geminiText = await getGeminiShift(value);
+        loader.style.display = 'none';
+
+        renderGemini(geminiText);
+      }
+
+      document.getElementById('shift').addEventListener('click', doShift);
+      document.getElementById('gemini-shift').addEventListener('click', doGeminiShift);
+
+      window.addEventListener('keydown', e =>{ const tag = (document.activeElement||{}).tagName||''; if(e.code==='Space' && tag!=='TEXTAREA'){ e.preventDefault(); doShift(); } });
+      const openers = {about:$$('a[href="#about"]')[0],contact:$$('a[href="#contact"]')[0],privacy:$$('a[href="#privacy"]')[0],pins:$$('a[href="#pins"]')[0]};
+      const modals = {about:$$('#modal-about')[0],contact:$$('#modal-contact')[0],privacy:$$('#modal-privacy')[0],pins:$$('#modal-pins')[0]};
+      function openModal(key){const m=modals[key];if(!m)return;m.classList.add('open');const f=m.querySelector('.closex');if(f)f.focus();if(key==='pins')loadPins();}
+      function closeModal(key){const m=modals[key];if(m)m.classList.remove('open');}
+      Object.entries(openers).forEach(([k,el])=>{if(!el)return;el.addEventListener('click',e=>{e.preventDefault();openModal(k);});});
+      document.addEventListener('click',e=>{const c=e.target.getAttribute&&e.target.getAttribute('data-close');if(c)closeModal(c);});
+      window.addEventListener('keydown',e=>{if(e.key==='Escape'){Object.values(modals).forEach(m=>m.classList.remove('open'));}});
+
+      const userLang = (navigator.language || navigator.userLanguage || 'en').split('-')[0];
+      const supportedLang = i18n.packs[userLang] ? userLang : 'en';
+      document.getElementById('thought').placeholder = i18n.get('placeholder', supportedLang);
+      document.getElementById('shift').textContent = i18n.get('shift_btn', supportedLang);
+      modeButtons.forEach(btn => {
+          const style = btn.dataset.style;
+          btn.textContent = i18n.get(`modes.${style}`, supportedLang);
+      });
+    });
+  </script>
+</body>
+</html>
+
