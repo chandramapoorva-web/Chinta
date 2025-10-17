@@ -1,0 +1,59 @@
+// This file acts as a secure backend function (serverless function).
+// It receives a prompt from the user's browser, adds the secret API key,
+// calls the Google Gemini API, and then sends the result back to the browser.
+// The user's browser NEVER sees the API key.
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method Not Allowed' });
+  }
+
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ message: 'Prompt is required.' });
+  }
+
+  // IMPORTANT: The API key is retrieved from a secure environment variable.
+  // DO NOT hardcode the key here.
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ message: 'API key is not configured on the server.' });
+  }
+
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+  
+  const systemPrompt = "You are a compassionate, wise coach. Your user is sharing a looping thought. Provide one single, gentle, and actionable reframe. Do not offer lists or multiple options. Keep your response concise and encouraging, under 40 words.";
+
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    systemInstruction: { parts: [{ text: systemPrompt }] },
+  };
+
+  try {
+    const apiResponse = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!apiResponse.ok) {
+      const errorData = await apiResponse.json();
+      console.error('Google API Error:', errorData);
+      return res.status(apiResponse.status).json({ message: `Google API Error: ${errorData.error.message}` });
+    }
+
+    const result = await apiResponse.json();
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      return res.status(500).json({ message: 'Invalid response structure from Google API.' });
+    }
+
+    res.status(200).json({ text });
+
+  } catch (error) {
+    console.error('Internal Server Error:', error);
+    res.status(500).json({ message: 'An internal error occurred.' });
+  }
+}
